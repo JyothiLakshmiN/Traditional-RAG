@@ -1,0 +1,14 @@
+.env
+.env
+
+# Local virtual environments
+venv/
+test_env/
+
+# FAISS indexes and session data
+faiss_store/
+session_data/
+data/current_session/
+
+# Notebook outputs
+*.ipynb_checkpoints
