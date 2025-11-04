@@ -1,6 +1,6 @@
 streamlit==1.50.0
 sentence-transformers==2.6.0
-huggingface-hub==0.22.2
+huggingface-hub==0.25.1
 torch==2.1.0
 transformers==4.38.2
 faiss-cpu==1.12.0
