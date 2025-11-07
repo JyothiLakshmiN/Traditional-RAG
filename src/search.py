@@ -29,11 +29,26 @@ class RAGSearch:
         results = self.vectorstore.query(query, top_k=top_k)
         texts = [r["metadata"].get("text", "") for r in results if r["metadata"]]
         context = "\n\n".join(texts)
+
         if not context:
             return "No relevant documents found."
-        prompt = f"""Summarize the following context for the query: '{query}'\n\nContext:\n{context}\n\nSummary:"""
+
+        prompt = f"""
+    You are a concise and direct assistant.
+
+    Context:
+    {context}
+
+    User Question: {query}
+
+    Answer in **3–6 short sentences**. Be clear, factual, and avoid unnecessary details.
+    If the answer is not directly present, state that briefly.
+    Answer:
+    """
+
         response = self.llm.invoke([prompt])
-        return response.content
+        return response.content.strip()
+
 
 # Example usage
 if __name__ == "__main__":
