@@ -36,6 +36,7 @@ SESSION_FAISS_DIR = os.path.join(BASE_FAISS_DIR, SESSION_DIR)
 os.makedirs(BASE_DATA_DIR, exist_ok=True)
 os.makedirs(BASE_FAISS_DIR, exist_ok=True)
 
+
 # --- Session State ---
 if "messages" not in st.session_state:
     st.session_state.messages = []  # conversational history
@@ -76,7 +77,7 @@ if uploaded_files:
     st.sidebar.success(f"✅ Uploaded {len(uploaded_files)} file(s) successfully!")
 
     # Indexing
-    with st.spinner("🔧 Indexing your documents..."):
+    with st.spinner("Indexing your documents..."):
         docs = load_all_documents(SESSION_DATA_DIR)
         store = FaissVectorStore(persist_dir=SESSION_FAISS_DIR)
         store.build_from_documents(docs)
@@ -84,11 +85,13 @@ if uploaded_files:
         st.session_state.store = store
 
     st.sidebar.success("Documents indexed successfully!")
+    # Clear previous chat history when new docs are uploaded
+    st.session_state.messages = []
     with st.spinner("📝 Generating summary..."):
         summary = summarize_documents(docs, rag_search)
         st.session_state["summary"] = summary
 
-    st.success("✅ Summary Ready!")
+    st.success("Summary Ready!")
     st.markdown(f"""
     <div style='padding:15px; border-radius:10px;'>
     <h4 style='color:#6A0DAD;'>📄 Document Summary:</h4>
@@ -109,8 +112,13 @@ for msg in st.session_state.messages:
 user_input = st.chat_input("Ask something about your documents...")
 
 if user_input:
-    if store is None:
-        st.error("⚠️ Please upload and index documents first.")
+    docs_exist = os.path.exists(SESSION_DATA_DIR) and len(os.listdir(SESSION_DATA_DIR)) > 0
+    if not docs_exist or store is None:
+        st.error("No documents found. Please upload and index documents first.")
+        # Clear chat history and summary
+        st.session_state.messages = []
+        st.session_state["summary"] = ""
+        st.session_state.store = None
     else:
         # Display user message
         st.session_state.messages.append(("user", user_input))
